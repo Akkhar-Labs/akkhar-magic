@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Session data (sovereign - never commit)
+.akkhar/
+profiles/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Puppeteer
+chromium/
+
+# Local documentation (private decisions & notes)
+LocalDocs/
