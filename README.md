@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/docs/banner.png" alt="Akkhar-Magic Banner" width="100%" />
+
 # Akkhar-Magic
 
 **The Open-Source UI-to-API Bridge for Google AI Studio**
