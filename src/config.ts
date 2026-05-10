@@ -22,7 +22,7 @@ export const DEFAULT_CONFIG: ServerConfig = {
   host: '127.0.0.1',
   modelName: 'gemini-3-flash-preview',
   executablePath: '',
-  aiStudioBaseUrl: 'https://aistudio.google.com',
+  googleAiStudioBaseUrl: 'https://aistudio.google.com',
   dataDir: path.join(PROJECT_ROOT, '.akkhar'),
   profilesDir: path.join(PROJECT_ROOT, 'profiles'),
   headless: false,

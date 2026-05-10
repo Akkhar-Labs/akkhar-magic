@@ -1,7 +1,7 @@
 /**
- * Akkhar-Magic :: AI Studio Prompt Injector
- * ==========================================
- * Injects prompts into AI Studio's textarea and submits them.
+ * Akkhar-Magic :: Google AI Studio Prompt Injector
+ * ===================================================
+ * Injects prompts into Google AI Studio's textarea and submits them.
  */
 
 import type { Page } from 'puppeteer-core';
@@ -12,12 +12,12 @@ import {
   TITLE_TAG_DIRECTIVE,
 } from '../../constants/prompts.js';
 import { TEXTAREA_WAIT_TIMEOUT } from '../../constants/timing.js';
-import { AI_STUDIO_SELECTORS } from './selectors.js';
+import { GOOGLE_AI_STUDIO_SELECTORS } from './selectors.js';
 import { createLogger, humanDelay } from '../../utils/index.js';
 
-const log = createLogger('AiStudioInjector');
+const log = createLogger('GoogleAiStudioInjector');
 
-export class AiStudioInjector {
+export class GoogleAiStudioInjector {
   /** Whether the current chat has an active context (for follow-up detection) */
   private hasActiveContext: boolean = false;
 
@@ -32,7 +32,7 @@ export class AiStudioInjector {
     log.info(`Waiting for textarea... (timeout: ${TEXTAREA_WAIT_TIMEOUT}ms)`);
 
     // Step 1: Wait for textarea
-    await page.waitForSelector(AI_STUDIO_SELECTORS.promptTextarea, {
+    await page.waitForSelector(GOOGLE_AI_STUDIO_SELECTORS.promptTextarea, {
       visible: true,
       timeout: TEXTAREA_WAIT_TIMEOUT,
     });
@@ -40,7 +40,7 @@ export class AiStudioInjector {
     await humanDelay(200, 400);
 
     // Step 2: Focus
-    await page.focus(AI_STUDIO_SELECTORS.promptTextarea);
+    await page.focus(GOOGLE_AI_STUDIO_SELECTORS.promptTextarea);
     await humanDelay(100, 200);
 
     // Step 3: Prepare prompt
@@ -107,7 +107,7 @@ export class AiStudioInjector {
         textarea.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true }));
         textarea.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
       },
-      AI_STUDIO_SELECTORS.promptTextarea,
+      GOOGLE_AI_STUDIO_SELECTORS.promptTextarea,
       finalPrompt,
     );
 
@@ -122,11 +122,11 @@ export class AiStudioInjector {
   /** Clicks the submit button with fallbacks */
   private async clickSubmit(page: Page): Promise<void> {
     try {
-      await page.waitForSelector(AI_STUDIO_SELECTORS.submitButton, {
+      await page.waitForSelector(GOOGLE_AI_STUDIO_SELECTORS.submitButton, {
         timeout: 10_000,
         visible: true,
       });
-      const button = await page.$(AI_STUDIO_SELECTORS.submitButton);
+      const button = await page.$(GOOGLE_AI_STUDIO_SELECTORS.submitButton);
 
       if (button) {
         const box = await button.boundingBox();
@@ -146,7 +146,7 @@ export class AiStudioInjector {
 
     // Fallback: run button
     try {
-      const runBtn = await page.$(AI_STUDIO_SELECTORS.runButton);
+      const runBtn = await page.$(GOOGLE_AI_STUDIO_SELECTORS.runButton);
       if (runBtn) {
         await runBtn.click();
         log.info('Clicked fallback run button');

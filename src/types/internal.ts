@@ -106,7 +106,7 @@ export interface ServerConfig {
   /** Path to the Chromium executable (auto-discovered or manual override) */
   executablePath: string;
   /** Base URL for Google AI Studio */
-  aiStudioBaseUrl: string;
+  googleAiStudioBaseUrl: string;
   /** Directory for .akkhar header files */
   dataDir: string;
   /** Directory for browser profiles */

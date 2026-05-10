@@ -187,6 +187,33 @@ export class Archivist {
     }
   }
 
+  /**
+   * Set/update the Gmail address bound to a profile.
+   * Captured during `npm run login` (Phase 2 of persistent sessions).
+   */
+  async setProfileGmail(profileName: string, gmail: string): Promise<void> {
+    this.ensureLoaded();
+    const profile = this.profileRegistry!.profiles.find(
+      p => p.name === profileName,
+    );
+    if (!profile) {
+      throw new Error(`Profile "${profileName}" does not exist.`);
+    }
+    profile.gmail = gmail;
+    await this.persistProfiles();
+  }
+
+  /**
+   * Get the Gmail address for a profile (or `null` if not yet captured).
+   */
+  getProfileGmail(profileName: string): string | null {
+    this.ensureLoaded();
+    const profile = this.profileRegistry!.profiles.find(
+      p => p.name === profileName,
+    );
+    return profile?.gmail ?? null;
+  }
+
   listProfiles(): BrowserProfile[] {
     this.ensureLoaded();
     return [...this.profileRegistry!.profiles];

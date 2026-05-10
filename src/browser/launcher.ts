@@ -15,6 +15,22 @@ puppeteer.use(StealthPlugin());
 
 const log = createLogger('BrowserLauncher');
 
+/**
+ * Optional callback invoked while the login browser is open. Lets a
+ * provider extract identity (e.g., the Google account email) without
+ * coupling the shared launcher to any specific provider.
+ *
+ * The launcher races this against the browser-close event: whichever
+ * resolves first wins, but the launcher always waits for the user to
+ * close the browser before returning.
+ */
+export type LoginIdentityExtractor<T> = (page: Page) => Promise<T | null>;
+
+export interface LoginResult<T> {
+  /** The value returned by the identity extractor, or `null` if none was provided or it didn't capture in time. */
+  identity: T | null;
+}
+
 export class BrowserLauncher {
   private browser: Browser | null = null;
   private page: Page | null = null;
@@ -130,11 +146,22 @@ export class BrowserLauncher {
     }
   }
 
-  /** Opens a visible browser for manual login. Returns when user closes it. */
-  async openLoginBrowser(
+  /**
+   * Opens a visible browser for manual login. Returns when user closes it.
+   *
+   * An optional `identityExtractor` may be supplied by the caller (typically
+   * a provider) to capture identity information (e.g., the logged-in account
+   * email) while the browser is open. The launcher remains provider-agnostic.
+   *
+   * The extractor races against the browser-close event: whichever resolves
+   * first wins, but the launcher always waits for the user to close the
+   * browser before returning.
+   */
+  async openLoginBrowser<T = never>(
     userDataDir: string,
     targetUrl: string,
-  ): Promise<void> {
+    identityExtractor?: LoginIdentityExtractor<T>,
+  ): Promise<LoginResult<T>> {
     const loginBrowser = await (
       puppeteer as unknown as typeof import('puppeteer-core')
     ).launch({
@@ -160,8 +187,21 @@ export class BrowserLauncher {
     log.info('[LOGIN] Browser opened. Please sign in.');
     log.info('[LOGIN] Close the browser window when done...');
 
-    await new Promise<void>(resolve => {
+    let capturedIdentity: T | null = null;
+
+    const extractorPromise = identityExtractor
+      ? identityExtractor(loginPage).then(value => {
+          capturedIdentity = value;
+        })
+      : Promise.resolve();
+
+    const closePromise = new Promise<void>(resolve => {
       loginBrowser.on('disconnected', () => resolve());
     });
+
+    await Promise.race([extractorPromise, closePromise]);
+    await closePromise;
+
+    return { identity: capturedIdentity };
   }
 }

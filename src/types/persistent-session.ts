@@ -45,7 +45,7 @@ export interface PersistentSession {
   sessionId: string;
 
   /**
-   * The AI Studio chat URL for this session.
+   * The Google AI Studio chat URL for this session.
    * Example: "https://aistudio.google.com/prompts/abc123xyz"
    *
    * THIS IS THE SOVEREIGN FIELD. Without it, session resumption is

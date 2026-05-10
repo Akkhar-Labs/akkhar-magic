@@ -1,16 +1,16 @@
 /**
- * Akkhar-Magic :: AI Studio Response Parser
- * ============================================
+ * Akkhar-Magic :: Google AI Studio Response Parser
+ * ====================================================
  * Parses Google's internal RPC nested array format.
- * AI Studio does NOT use the public Gemini API JSON format.
+ * Google AI Studio does NOT use the public Gemini API JSON format.
  * The response is a deeply nested array with model text at varying depths.
  */
 
 /**
- * Extracts text content from AI Studio's raw response data.
+ * Extracts text content from Google AI Studio's raw response data.
  * Handles both Google Internal RPC (nested arrays) and public Gemini API JSON.
  */
-export function parseAiStudioResponse(rawData: string): string[] {
+export function parseGoogleAiStudioResponse(rawData: string): string[] {
   const texts: string[] = [];
 
   let parsed: any;

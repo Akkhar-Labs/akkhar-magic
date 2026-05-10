@@ -18,6 +18,7 @@ import { resolveConfig } from '../config.js';
 import { Archivist } from '../persistence/archivist.js';
 import { BrowserLauncher } from '../browser/launcher.js';
 import { discoverBrowser } from '../browser/discovery.js';
+import { waitForAccountEmail } from '../providers/google-ai-studio/index.js';
 
 const program = new Command();
 
@@ -72,17 +73,35 @@ program
     );
     console.log(chalk.gray('  Close the browser when done.\n'));
 
-    await launcher.openLoginBrowser(
+    const { identity: gmail } = await launcher.openLoginBrowser(
       archivist.getActiveProfileDir(),
-      `${config.aiStudioBaseUrl}/prompts/new_chat`,
+      `${config.googleAiStudioBaseUrl}/prompts/new_chat`,
+      waitForAccountEmail,
     );
+
     await archivist.markAuthenticated(opts.profile);
 
-    console.log(
-      chalk.green(
-        `\n✓ Profile "${opts.profile}" authenticated successfully!\n`,
-      ),
-    );
+    if (gmail) {
+      await archivist.setProfileGmail(opts.profile, gmail);
+      console.log(chalk.green(`\n✓ Logged in as ${chalk.bold(gmail)}`));
+      console.log(
+        chalk.green(
+          `✓ Profile "${opts.profile}" authenticated successfully!\n`,
+        ),
+      );
+    } else {
+      console.log(
+        chalk.green(
+          `\n✓ Profile "${opts.profile}" authenticated successfully!`,
+        ),
+      );
+      console.log(
+        chalk.yellow(
+          '⚠ Could not auto-detect Gmail address. ' +
+            'Persistent sessions may be limited until next login.\n',
+        ),
+      );
+    }
   });
 
 // ─── switch ──────────────────────────────────────────────────────
@@ -138,7 +157,8 @@ program
     for (const p of profiles) {
       const active = p.name === activeProfile ? chalk.green(' ◄ active') : '';
       const auth = p.authenticated ? chalk.green('✓') : chalk.red('✗');
-      console.log(chalk.white(`    ${auth} ${p.name}${active}`));
+      const gmail = p.gmail ? chalk.gray(` (${p.gmail})`) : '';
+      console.log(chalk.white(`    ${auth} ${p.name}${gmail}${active}`));
     }
 
     console.log(chalk.cyan(`\n  Sessions: ${sessions.length}`));
@@ -178,6 +198,7 @@ program
         : chalk.yellow('not authenticated');
       console.log(chalk.white(`\n  ${p.name}${active}`));
       console.log(chalk.gray(`    Status:    ${auth}`));
+      console.log(chalk.gray(`    Gmail:     ${p.gmail ?? '(not captured)'}`));
       console.log(chalk.gray(`    Data dir:  ${p.userDataDir}`));
       console.log(chalk.gray(`    Last used: ${p.lastUsed}`));
     }

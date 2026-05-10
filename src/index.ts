@@ -73,7 +73,7 @@ async function bootstrap(): Promise<void> {
   const cdpMonitor = new CdpMonitor();
 
   // 4. Provider
-  const providerName = process.env.AKKHAR_PROVIDER ?? 'ai-studio';
+  const providerName = process.env.AKKHAR_PROVIDER ?? 'google-ai-studio';
   const provider = createProvider(providerName);
   log.info(`Provider: ${provider.name} (${provider.baseUrl})`);
 

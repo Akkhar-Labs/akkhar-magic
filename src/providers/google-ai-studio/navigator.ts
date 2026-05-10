@@ -1,19 +1,19 @@
 /**
- * Akkhar-Magic :: AI Studio Navigator
- * =====================================
- * Handles navigation to AI Studio chats with smart multi-turn reuse.
+ * Akkhar-Magic :: Google AI Studio Navigator
+ * =============================================
+ * Handles navigation to Google AI Studio chats with smart multi-turn reuse.
  */
 
 import type { Page } from 'puppeteer-core';
 import type { ActiveChatState } from '../../types/browser.js';
 import type { NavigateOptions } from '../../types/provider.js';
 import { CHAT_STALE_TIMEOUT } from '../../constants/timing.js';
-import { AI_STUDIO_NEW_CHAT_URL } from './constants.js';
+import { GOOGLE_AI_STUDIO_NEW_CHAT_URL } from './constants.js';
 import { createLogger, humanDelay } from '../../utils/index.js';
 
-const log = createLogger('AiStudioNav');
+const log = createLogger('GoogleAiStudioNav');
 
-export class AiStudioNavigator {
+export class GoogleAiStudioNavigator {
   private activeChatState: ActiveChatState | null = null;
   private lastActiveChatUrl: string | null = null;
 
@@ -68,7 +68,7 @@ export class AiStudioNavigator {
       );
     }
 
-    const targetUrl = AI_STUDIO_NEW_CHAT_URL;
+    const targetUrl = GOOGLE_AI_STUDIO_NEW_CHAT_URL;
     log.info(`Going to: ${targetUrl}`);
 
     await page.goto(targetUrl, {

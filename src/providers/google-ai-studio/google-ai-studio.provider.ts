@@ -1,8 +1,8 @@
 /**
- * Akkhar-Magic :: AI Studio Provider
- * ====================================
+ * Akkhar-Magic :: Google AI Studio Provider
+ * ============================================
  * Implements IProvider for Google AI Studio.
- * Encapsulates all AI Studio-specific logic: navigation, injection, extraction.
+ * Encapsulates all Google AI Studio-specific logic: navigation, injection, extraction.
  */
 
 import type { Page } from 'puppeteer-core';
@@ -13,25 +13,28 @@ import type {
   InjectOptions,
   ExtractionCallbacks,
 } from '../../types/provider.js';
-import { AI_STUDIO_BASE_URL, AI_STUDIO_ENDPOINTS } from './constants.js';
-import { AiStudioNavigator } from './navigator.js';
-import { AiStudioInjector } from './injector.js';
-import { AiStudioExtractor } from './extractor.js';
+import {
+  GOOGLE_AI_STUDIO_BASE_URL,
+  GOOGLE_AI_STUDIO_ENDPOINTS,
+} from './constants.js';
+import { GoogleAiStudioNavigator } from './navigator.js';
+import { GoogleAiStudioInjector } from './injector.js';
+import { GoogleAiStudioExtractor } from './extractor.js';
 import { createLogger } from '../../utils/index.js';
 
-const log = createLogger('AiStudioProvider');
+const log = createLogger('GoogleAiStudioProvider');
 
-export class AiStudioProvider implements IProvider {
-  readonly name = 'ai-studio';
-  readonly baseUrl = AI_STUDIO_BASE_URL;
+export class GoogleAiStudioProvider implements IProvider {
+  readonly name = 'google-ai-studio';
+  readonly baseUrl = GOOGLE_AI_STUDIO_BASE_URL;
 
-  private navigator = new AiStudioNavigator();
-  private injector = new AiStudioInjector();
-  private extractor = new AiStudioExtractor();
+  private navigator = new GoogleAiStudioNavigator();
+  private injector = new GoogleAiStudioInjector();
+  private extractor = new GoogleAiStudioExtractor();
 
-  /** Configure CDP monitor with AI Studio endpoint patterns */
+  /** Configure CDP monitor with Google AI Studio endpoint patterns */
   configureCdp(cdpMonitor: CdpMonitor): void {
-    cdpMonitor.setEndpointPatterns([...AI_STUDIO_ENDPOINTS]);
+    cdpMonitor.setEndpointPatterns([...GOOGLE_AI_STUDIO_ENDPOINTS]);
   }
 
   async navigate(page: Page, options: NavigateOptions): Promise<void> {

@@ -1,12 +1,12 @@
 /**
- * Akkhar-Magic :: AI Studio DOM Selectors
- * =========================================
+ * Akkhar-Magic :: Google AI Studio DOM Selectors
+ * ================================================
  * Single source of truth for all Google AI Studio DOM selectors.
  * Based on forensic audit (May 2026). If Google updates their UI,
  * only this file needs to change.
  */
 
-export const AI_STUDIO_SELECTORS = {
+export const GOOGLE_AI_STUDIO_SELECTORS = {
   /** The prompt textarea */
   promptTextarea: 'textarea[aria-label="Enter a prompt"]',
 

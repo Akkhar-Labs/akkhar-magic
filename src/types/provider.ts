@@ -36,7 +36,7 @@ export interface InjectOptions {
 // ─── The Provider Interface ──────────────────────────────────────
 
 export interface IProvider {
-  /** Unique provider identifier (e.g., 'ai-studio', 'chatgpt') */
+  /** Unique provider identifier (e.g., 'google-ai-studio', 'chatgpt') */
   readonly name: string;
 
   /** Base URL for the platform */

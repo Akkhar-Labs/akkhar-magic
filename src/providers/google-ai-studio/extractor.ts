@@ -1,6 +1,6 @@
 /**
- * Akkhar-Magic :: AI Studio Extractor
- * =====================================
+ * Akkhar-Magic :: Google AI Studio Extractor
+ * =============================================
  * Extracts Gemini responses via CDP network interception (primary)
  * with DOM fallback. Handles both streaming and complete responses.
  */
@@ -14,17 +14,17 @@ import {
   detectStreamError,
   detectDomError,
 } from '../../network/error-detector.js';
-import { parseAiStudioResponse } from './response-parser.js';
-import { AI_STUDIO_SELECTORS } from './selectors.js';
+import { parseGoogleAiStudioResponse } from './response-parser.js';
+import { GOOGLE_AI_STUDIO_SELECTORS } from './selectors.js';
 import {
   STABLE_POLL_THRESHOLD,
   FIRST_RESPONSE_TIMEOUT,
 } from '../../constants/timing.js';
 import { createLogger, sleep } from '../../utils/index.js';
 
-const log = createLogger('AiStudioExtractor');
+const log = createLogger('GoogleAiStudioExtractor');
 
-export class AiStudioExtractor {
+export class GoogleAiStudioExtractor {
   /**
    * Extracts response via CDP network interception.
    * Falls back to DOM if circuit breaker is tripped.
@@ -74,7 +74,7 @@ export class AiStudioExtractor {
       }
 
       // Parse the response
-      const fragments = parseAiStudioResponse(rawBody);
+      const fragments = parseGoogleAiStudioResponse(rawBody);
       for (const text of fragments) {
         if (text.length === 0) continue;
 
@@ -156,7 +156,7 @@ export class AiStudioExtractor {
             if (el?.textContent?.trim()) return true;
           }
           return false;
-        }, AI_STUDIO_SELECTORS);
+        }, GOOGLE_AI_STUDIO_SELECTORS);
 
         if (hasResponse) {
           responseStarted = true;
@@ -168,7 +168,7 @@ export class AiStudioExtractor {
         const bannerText = await page.evaluate(sel => {
           const el = document.querySelector(sel.limitBanner);
           return el?.textContent?.trim() ?? '';
-        }, AI_STUDIO_SELECTORS);
+        }, GOOGLE_AI_STUDIO_SELECTORS);
 
         if (bannerText.length > 0) {
           const domError = detectDomError(bannerText);
@@ -239,7 +239,7 @@ export class AiStudioExtractor {
         }
       }
       return '';
-    }, AI_STUDIO_SELECTORS);
+    }, GOOGLE_AI_STUDIO_SELECTORS);
   }
 
   /** Check if AI Studio is still generating */
@@ -264,6 +264,6 @@ export class AiStudioExtractor {
       ) as HTMLButtonElement | null;
       if (runBtn && !runBtn.disabled) return false;
       return false;
-    }, AI_STUDIO_SELECTORS);
+    }, GOOGLE_AI_STUDIO_SELECTORS);
   }
 }
