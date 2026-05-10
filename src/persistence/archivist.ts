@@ -19,11 +19,13 @@ import type {
   ServerConfig,
 } from '../types/index.js';
 import { createLogger } from '../utils/index.js';
+import { PersistentSessionStore } from './session-store.js';
 
 const log = createLogger('Archivist');
 
 const HEADER_FILENAME = 'sessions.json';
 const PROFILES_FILENAME = 'profiles.json';
+const PERSISTENT_SESSIONS_DIRNAME = 'persistent-sessions';
 const HEADER_VERSION = '0.0.1';
 
 export class Archivist {
@@ -32,11 +34,15 @@ export class Archivist {
   private profilesPath: string;
   private header: AkkharHeaderFile | null = null;
   private profileRegistry: ProfileRegistry | null = null;
+  private readonly persistentSessions: PersistentSessionStore;
 
   constructor(config: ServerConfig) {
     this.config = config;
     this.headerPath = path.join(config.dataDir, HEADER_FILENAME);
     this.profilesPath = path.join(config.dataDir, PROFILES_FILENAME);
+    this.persistentSessions = new PersistentSessionStore(
+      path.join(config.dataDir, PERSISTENT_SESSIONS_DIRNAME),
+    );
   }
 
   async initialize(): Promise<void> {
@@ -44,8 +50,19 @@ export class Archivist {
     await fs.mkdir(this.config.profilesDir, { recursive: true });
     this.header = await this.loadOrCreateHeader();
     this.profileRegistry = await this.loadOrCreateProfiles();
-    log.info(`Initialized with ${Object.keys(this.header.sessions).length} session(s)`);
+    await this.persistentSessions.initialize();
+    log.info(
+      `Initialized with ${Object.keys(this.header.sessions).length} session(s)`,
+    );
     log.info(`Active profile: "${this.profileRegistry.activeProfile}"`);
+  }
+
+  /**
+   * Access the persistent session store (Phase 1+ of persistent sessions).
+   * Distinct from the legacy in-memory `SessionEntry` map managed above.
+   */
+  getPersistentSessions(): PersistentSessionStore {
+    return this.persistentSessions;
   }
 
   // ─── Session Operations ──────────────────────────────────────
@@ -118,14 +135,18 @@ export class Archivist {
       p => p.name === this.profileRegistry!.activeProfile,
     );
     if (!profile) {
-      throw new Error(`Active profile "${this.profileRegistry!.activeProfile}" not found`);
+      throw new Error(
+        `Active profile "${this.profileRegistry!.activeProfile}" not found`,
+      );
     }
     return profile.userDataDir;
   }
 
   async switchProfile(profileName: string): Promise<BrowserProfile> {
     this.ensureLoaded();
-    const profile = this.profileRegistry!.profiles.find(p => p.name === profileName);
+    const profile = this.profileRegistry!.profiles.find(
+      p => p.name === profileName,
+    );
     if (!profile) {
       throw new Error(`Profile "${profileName}" does not exist.`);
     }
@@ -157,7 +178,9 @@ export class Archivist {
 
   async markAuthenticated(profileName: string): Promise<void> {
     this.ensureLoaded();
-    const profile = this.profileRegistry!.profiles.find(p => p.name === profileName);
+    const profile = this.profileRegistry!.profiles.find(
+      p => p.name === profileName,
+    );
     if (profile) {
       profile.authenticated = true;
       await this.persistProfiles();
@@ -201,12 +224,14 @@ export class Archivist {
       await fs.mkdir(defaultDir, { recursive: true });
       const registry: ProfileRegistry = {
         activeProfile: 'default',
-        profiles: [{
-          name: 'default',
-          userDataDir: defaultDir,
-          authenticated: false,
-          lastUsed: new Date().toISOString(),
-        }],
+        profiles: [
+          {
+            name: 'default',
+            userDataDir: defaultDir,
+            authenticated: false,
+            lastUsed: new Date().toISOString(),
+          },
+        ],
       };
       await this.writeJson(this.profilesPath, registry);
       return registry;
@@ -218,7 +243,8 @@ export class Archivist {
   }
 
   private async persistProfiles(): Promise<void> {
-    if (this.profileRegistry) await this.writeJson(this.profilesPath, this.profileRegistry);
+    if (this.profileRegistry)
+      await this.writeJson(this.profilesPath, this.profileRegistry);
   }
 
   private async writeJson(filePath: string, data: unknown): Promise<void> {
