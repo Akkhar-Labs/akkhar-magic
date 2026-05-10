@@ -106,6 +106,7 @@ export class CompletionService {
       prompt: prepared.prompt,
       isFollowUp: prepared.isFollowUp,
       fullPrompt: prepared.fullPrompt,
+      sessionId: prepared.akkharId ?? undefined,
     });
 
     // 5. Extract

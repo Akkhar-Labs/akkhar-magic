@@ -31,6 +31,13 @@ export interface InjectOptions {
   prompt: string;
   isFollowUp: boolean;
   fullPrompt?: string | null;
+  /**
+   * Active Akkhar identity to embed in the submitted prompt. Provided
+   * on first turns only; absent for follow-ups. The injector appends
+   * `<AKKHAR_ID_${sessionId}>` at the very end of the final prompt so
+   * the model echoes it back through future conversation history.
+   */
+  sessionId?: string;
 }
 
 // ─── The Provider Interface ──────────────────────────────────────

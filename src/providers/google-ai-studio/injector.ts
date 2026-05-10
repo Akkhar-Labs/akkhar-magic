@@ -6,13 +6,9 @@
 
 import type { Page } from 'puppeteer-core';
 import type { InjectOptions } from '../../types/provider.js';
-import {
-  PROMPT_GUARD,
-  RESPONSE_TAG_DIRECTIVE,
-  TITLE_TAG_DIRECTIVE,
-} from '../../constants/prompts.js';
 import { TEXTAREA_WAIT_TIMEOUT } from '../../constants/timing.js';
 import { GOOGLE_AI_STUDIO_SELECTORS } from './selectors.js';
+import { buildFinalPrompt } from './prompt-builder.js';
 import { createLogger, humanDelay } from '../../utils/index.js';
 
 const log = createLogger('GoogleAiStudioInjector');
@@ -27,7 +23,7 @@ export class GoogleAiStudioInjector {
 
   /** Injects a prompt into the textarea and clicks submit */
   async inject(page: Page, options: InjectOptions): Promise<void> {
-    const { prompt, isFollowUp, fullPrompt } = options;
+    const { prompt, isFollowUp, fullPrompt, sessionId } = options;
 
     log.info(`Waiting for textarea... (timeout: ${TEXTAREA_WAIT_TIMEOUT}ms)`);
 
@@ -43,37 +39,24 @@ export class GoogleAiStudioInjector {
     await page.focus(GOOGLE_AI_STUDIO_SELECTORS.promptTextarea);
     await humanDelay(100, 200);
 
-    // Step 3: Prepare prompt
-    let finalPrompt: string;
-    let effectiveFollowUp = isFollowUp;
+    // Step 3: Compose final prompt via the pure builder.
+    const { finalPrompt, effectiveFollowUp, guardApplied, akkharIdTagApplied } =
+      buildFinalPrompt({
+        prompt,
+        isFollowUp,
+        fullPrompt,
+        hasActiveContext: this.hasActiveContext,
+        sessionId,
+      });
 
-    if (isFollowUp && !this.hasActiveContext) {
-      // Context lost — fall back to full prompt
-      if (fullPrompt) {
-        finalPrompt = fullPrompt;
-        effectiveFollowUp = false;
-        log.warn('Context lost — using full prompt fallback');
-      } else {
-        finalPrompt = prompt;
-      }
-    } else if (isFollowUp) {
-      finalPrompt = prompt;
-    } else {
-      const hasIdeSystemPrompt = prompt.startsWith('[System Instructions]');
-      if (hasIdeSystemPrompt) {
-        finalPrompt = prompt;
-        log.info('IDE system prompt detected — skipping prompt guard');
-      } else {
-        finalPrompt = PROMPT_GUARD + prompt;
-      }
+    if (isFollowUp && !this.hasActiveContext && fullPrompt) {
+      log.warn('Context lost — using full prompt fallback');
     }
-
-    // Always append tag directive
-    finalPrompt += RESPONSE_TAG_DIRECTIVE;
-
-    // First turn only: ask the model to also generate a title
-    if (!effectiveFollowUp) {
-      finalPrompt += TITLE_TAG_DIRECTIVE;
+    if (guardApplied) {
+      log.info('Applied PROMPT_GUARD (no IDE system prompt detected)');
+    }
+    if (akkharIdTagApplied && sessionId) {
+      log.info(`Embedded Akkhar identity tag: ${sessionId}`);
     }
 
     log.info(

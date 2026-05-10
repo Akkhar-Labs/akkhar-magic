@@ -7,6 +7,9 @@
 
 import crypto from 'node:crypto';
 import type { ChatCompletionRequest } from '../types/index.js';
+import { generateAkkharId, createLogger } from '../utils/index.js';
+
+const log = createLogger('PromptService');
 
 export interface PreparedPrompt {
   /** The prompt to inject (follow-up or full) */
@@ -19,6 +22,12 @@ export interface PreparedPrompt {
   systemPrompt: string;
   /** Stable conversation identity: hash of first user message content */
   conversationFingerprint: string;
+  /**
+   * Active Akkhar identity (AKID) generated for first-turn prompts.
+   * `null` on follow-ups — the existing AKID is recovered from message
+   * history by SessionResolver in a later phase.
+   */
+  akkharId: string | null;
 }
 
 export class PromptService {
@@ -34,12 +43,20 @@ export class PromptService {
 
     const conversationFingerprint = this.computeFingerprint(request);
 
+    // First turn only: mint a fresh Akkhar identity. Follow-ups inherit
+    // their AKID from message history (resolved in a later phase).
+    const akkharId = isFollowUp ? null : generateAkkharId();
+    if (akkharId) {
+      log.info(`Minted Akkhar identity for new conversation: ${akkharId}`);
+    }
+
     return {
       prompt: (isFollowUp ? followUpPrompt : fullPrompt) ?? '',
       fullPrompt,
       isFollowUp,
       systemPrompt,
       conversationFingerprint,
+      akkharId,
     };
   }
 
