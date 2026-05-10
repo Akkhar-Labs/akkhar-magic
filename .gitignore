@@ -25,6 +25,9 @@ Thumbs.db
 *.log
 npm-debug.log*
 
+# Test output
+coverage/
+
 # Puppeteer
 chromium/
 

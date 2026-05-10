@@ -20,7 +20,11 @@
     "cli": "tsx src/cli/index.ts",
     "login": "tsx src/cli/index.ts login",
     "switch": "tsx src/cli/index.ts switch",
-    "status": "tsx src/cli/index.ts status"
+    "status": "tsx src/cli/index.ts status",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "bin": {
     "akkhar-magic": "./dist/cli/index.js"
@@ -38,9 +42,11 @@
   "devDependencies": {
     "@types/node": "^25.6.0",
     "@types/uuid": "^10.0.0",
+    "@vitest/ui": "^4.1.5",
     "esbuild": "^0.28.0",
     "postject": "^1.0.0-alpha.6",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   }
 }
