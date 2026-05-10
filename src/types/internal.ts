@@ -38,6 +38,12 @@ export interface BrowserProfile {
   authenticated: boolean;
   /** ISO timestamp of last usage */
   lastUsed: string;
+  /**
+   * Gmail address (Google account email) bound to this profile.
+   * Captured once at `npm run login` time (Phase 2 of persistent sessions).
+   * Optional for backwards compatibility with v0.0.1 profiles.
+   */
+  gmail?: string;
 }
 
 export interface ProfileRegistry {

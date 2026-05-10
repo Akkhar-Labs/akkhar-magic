@@ -88,3 +88,82 @@ export class RpcError extends AkkharError {
     this.name = 'RpcError';
   }
 }
+
+// ─── Persistent Session Errors ───────────────────────────────────
+// See: LocalDocs/BLUEPRINT_PERSISTENT_SESSIONS.md §9
+
+/**
+ * Stable error codes for the persistent-session subsystem.
+ * Surfaced through the OpenAI-compatible error response shape.
+ */
+export const PERSISTENT_SESSION_ERROR_CODES = {
+  SESSION_DELETED: 'session_deleted',
+  SESSION_PROFILE_MISMATCH: 'session_profile_mismatch',
+  SESSION_NOT_FOUND: 'session_not_found',
+} as const;
+
+export type PersistentSessionErrorCode =
+  (typeof PERSISTENT_SESSION_ERROR_CODES)[keyof typeof PERSISTENT_SESSION_ERROR_CODES];
+
+/**
+ * The conversation's saved chatUrl no longer resolves in AI Studio
+ * (redirected to /new_chat or 404'd). The session is permanently marked
+ * deleted; the user must start a new conversation.
+ */
+export class SessionDeletedError extends AkkharError {
+  constructor(
+    public readonly sessionId: string,
+    public readonly title: string | null,
+    public readonly createdAt: string,
+    public readonly gmail: string,
+  ) {
+    const titlePart = title ? ` titled "${title}"` : '';
+    super(
+      `Akkhar-Magic: This conversation was deleted in Google AI Studio. ` +
+        `The session${titlePart} (created ${createdAt.slice(0, 10)}, ` +
+        `account: ${gmail}) no longer exists. ` +
+        `Please start a new conversation.`,
+      PERSISTENT_SESSION_ERROR_CODES.SESSION_DELETED,
+    );
+    this.name = 'SessionDeletedError';
+  }
+}
+
+/**
+ * The session belongs to a different Gmail account than the one currently
+ * active. The user must switch profiles to resume it.
+ */
+export class SessionProfileMismatchError extends AkkharError {
+  constructor(
+    public readonly sessionGmail: string,
+    public readonly sessionProfileName: string,
+    public readonly activeGmail: string,
+    public readonly activeProfileName: string,
+  ) {
+    super(
+      `Akkhar-Magic: This conversation belongs to ${sessionGmail} ` +
+        `(profile: "${sessionProfileName}"). You are currently using ` +
+        `${activeGmail} (profile: "${activeProfileName}"). ` +
+        `Switch profiles with: npm run switch -- ${sessionProfileName}`,
+      PERSISTENT_SESSION_ERROR_CODES.SESSION_PROFILE_MISMATCH,
+    );
+    this.name = 'SessionProfileMismatchError';
+  }
+}
+
+/**
+ * A follow-up arrived carrying an AKKHAR_ID, but no matching record exists
+ * in the persistent store (e.g., the store was wiped, or the session was
+ * created before persistent sessions were enabled).
+ */
+export class SessionNotFoundError extends AkkharError {
+  constructor(public readonly sessionId: string) {
+    super(
+      `Akkhar-Magic: No saved session found for this conversation. ` +
+        `This may happen if the server was restarted before persistent ` +
+        `sessions were enabled. Starting a new conversation.`,
+      PERSISTENT_SESSION_ERROR_CODES.SESSION_NOT_FOUND,
+    );
+    this.name = 'SessionNotFoundError';
+  }
+}

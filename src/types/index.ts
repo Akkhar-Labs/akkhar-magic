@@ -3,3 +3,4 @@ export * from './internal.js';
 export * from './browser.js';
 export * from './provider.js';
 export * from './errors.js';
+export * from './persistent-session.js';
