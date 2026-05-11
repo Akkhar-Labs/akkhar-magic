@@ -13,6 +13,7 @@ import type { CdpMonitor } from '../browser/cdp-monitor.js';
 import type { ChatCompletionRequest, ServerConfig } from '../types/index.js';
 import { PromptService } from './prompt.service.js';
 import { SessionService } from './session.service.js';
+import { resolveSession } from './session-resolver.js';
 import { TitleCache } from './title-cache.js';
 import { createLogger } from '../utils/index.js';
 
@@ -84,6 +85,14 @@ export class CompletionService {
 
     // 2. Prepare prompt
     const prepared = this.promptService.prepare(request);
+
+    // 2b. Resolve persistent session (log-only for now — Phase 6 acts on it)
+    const resolution = resolveSession(request.messages);
+    log.info(
+      `Session resolution: ${resolution.type}${
+        resolution.type === 'resume' ? ` → ${resolution.sessionId}` : ''
+      }`,
+    );
 
     log.info(
       `Completion: messages=${request.messages.length}, followUp=${prepared.isFollowUp}, fingerprint=${prepared.conversationFingerprint.slice(0, 8)}`,
