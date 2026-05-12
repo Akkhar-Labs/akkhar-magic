@@ -7,7 +7,7 @@
 import type { Page } from 'puppeteer-core';
 import type { ActiveChatState } from '../../types/browser.js';
 import type { NavigateOptions } from '../../types/provider.js';
-import { CHAT_STALE_TIMEOUT } from '../../constants/timing.js';
+
 import { GOOGLE_AI_STUDIO_NEW_CHAT_URL } from './constants.js';
 import { createLogger, humanDelay } from '../../utils/index.js';
 
@@ -39,16 +39,16 @@ export class GoogleAiStudioNavigator {
   async navigate(page: Page, options: NavigateOptions): Promise<void> {
     const { conversationFingerprint, isFollowUp } = options;
 
-    // Can we reuse the current chat?
+    // Can we reuse the current chat? (Persistent Identity logic)
     if (isFollowUp && this.activeChatState) {
       const chat = this.activeChatState;
       const isFingerprintMatch =
         chat.conversationFingerprint === conversationFingerprint;
-      const isFresh = Date.now() - chat.lastActivityTime < CHAT_STALE_TIMEOUT;
       const currentUrl = page.url();
       const isOnSite = currentUrl.includes('aistudio.google.com');
 
-      if (chat.isActive && isFingerprintMatch && isFresh && isOnSite) {
+      // Session stays active as long as fingerprint matches and browser is on site
+      if (chat.isActive && isFingerprintMatch && isOnSite) {
         chat.turnCount++;
         log.info(
           `♻️ Reusing existing chat (turn ${chat.turnCount}, fp=${conversationFingerprint.slice(0, 8)})`,
@@ -56,8 +56,8 @@ export class GoogleAiStudioNavigator {
         return;
       }
 
-      if (!isFingerprintMatch) log.info('Conversation changed — new chat');
-      else if (!isFresh) log.info('Chat stale (>10 min) — new chat');
+      if (!isFingerprintMatch)
+        log.info('Conversation changed (Fingerprint mismatch) — new chat');
       else if (!isOnSite) log.info('Page navigated away — new chat');
     }
 
