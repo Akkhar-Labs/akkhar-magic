@@ -11,9 +11,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg)](https://www.typescriptlang.org)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
-Akkhar-Magic intercepts OpenAI-compatible API requests from agentic IDEs and
-routes them through Google AI Studio's browser interface — giving you access to
-Gemini models with zero API costs.
+Akkhar-Magic converts your existing Google AI Studio web access into a local
+OpenAI-compatible API — letting your IDE, scripts, and tools interact with
+Gemini models through a standardized interface.
 
 [Quick Start](#quick-start) · [Documentation](docs/) ·
 [Architecture](docs/architecture/) · [API Reference](docs/reference/)
@@ -24,19 +24,30 @@ Gemini models with zero API costs.
 
 ## Overview
 
-Akkhar-Magic sits between your IDE and Google AI Studio. Your IDE thinks it's
-talking to an OpenAI-compatible API. Akkhar-Magic translates those requests into
-browser interactions, puppeteering AI Studio's UI to generate responses, then
-streams them back in the format your IDE expects.
+Akkhar-Magic is a **research and utility bridge** that sits between your IDE and
+Google AI Studio. It translates OpenAI-compatible API requests into browser
+interactions with AI Studio's web interface, then streams responses back in the
+standard format your tools expect.
+
+If you already use Google AI Studio through your browser, Akkhar-Magic makes
+that same access available as a local API endpoint — so your IDE, automation
+scripts, or any OpenAI-compatible client can use it programmatically.
 
 **Supported Models:** Any model available in your Google AI Studio account
 (Gemini 2.5 Flash, Gemini 2.5 Pro, etc.)
+
+> **Note:** Akkhar-Magic is a research and utility project exploring UI-to-API
+> bridging techniques including CDP network interception, protocol reverse
+> engineering, and browser automation patterns. It relies on your own
+> authenticated Google AI Studio session and operates within your account's
+> existing usage limits.
 
 ### Key Features
 
 - **OpenAI-Compatible API** — Drop-in replacement. Same endpoints, same SSE
   streaming, same response format.
-- **Zero API Costs** — Uses AI Studio's web interface, not the paid Gemini API.
+- **Uses Your Existing AI Studio Access** — Bridges your authenticated web
+  session into a local API. Operates within your account's usage limits.
 - **Multi-Turn Conversations** — Automatic session reuse with content-based
   fingerprinting.
 - **Smart Error Handling** — Rate limits, safety filters, and internal errors
@@ -146,7 +157,8 @@ npm run dev
 | API Key  | `any-value`                |
 | Model    | `gemini-3-flash-preview`   |
 
-That's it. Your IDE is now powered by Google AI Studio.
+That's it. Your IDE is now connected to Google AI Studio through your local
+bridge.
 
 > For detailed setup instructions per IDE, see
 > [Getting Started](docs/getting-started/).

@@ -1,6 +1,8 @@
 # Profiles & Multi-Account
 
-Akkhar-Magic supports multiple Google accounts through browser profiles. Each profile is an isolated browser environment with its own cookies, session data, and authentication state.
+Akkhar-Magic supports multiple Google accounts through browser profiles. Each
+profile is an isolated browser environment with its own cookies, session data,
+and authentication state.
 
 ## How Profiles Work
 
@@ -11,7 +13,8 @@ profiles/
 └── personal/       # A personal Google account
 ```
 
-Each profile directory is a complete Chromium user data directory — the same structure Chrome uses internally.
+Each profile directory is a complete Chromium user data directory — the same
+structure Chrome uses internally.
 
 ## Managing Profiles
 
@@ -33,7 +36,8 @@ npm run login -- -p work-account
 npm run switch -- work-account
 ```
 
-The server uses the active profile for all subsequent requests. Restart the server after switching.
+The server uses the active profile for all subsequent requests. Restart the
+server after switching.
 
 ### List All Profiles
 
@@ -74,12 +78,13 @@ npm run switch -- personal
 npm run dev
 ```
 
-### Rate Limit Rotation
+### Account Switching
 
-Google AI Studio applies rate limits per account. Multiple profiles allow you to rotate:
+Google AI Studio applies usage limits per account. Multiple profiles allow you
+to switch between accounts when needed:
 
 ```bash
-# Account 1 hit rate limit
+# Switch to a different account
 npm run switch -- account-2
 # Restart the server
 npm run dev
@@ -87,11 +92,13 @@ npm run dev
 
 ### Team Sharing
 
-Each team member creates their own profile on a shared development machine. Profiles are isolated — one person's session doesn't affect another.
+Each team member creates their own profile on a shared development machine.
+Profiles are isolated — one person's session doesn't affect another.
 
 ## Data Storage
 
-Profile data is stored in the `profiles/` directory at the project root. This directory is:
+Profile data is stored in the `profiles/` directory at the project root. This
+directory is:
 
 - **Gitignored** — never committed to version control
 - **Local only** — never transmitted externally

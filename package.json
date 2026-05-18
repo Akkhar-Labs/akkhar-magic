@@ -1,7 +1,7 @@
 {
   "name": "@akkhar-labs/akkhar-magic",
   "version": "0.0.1",
-  "description": "UI-to-API bridge: Intercepts OpenAI-compatible requests and routes them through Google AI Studio via headless Puppeteer",
+  "description": "UI-to-API bridge: Converts your Google AI Studio web access into a local OpenAI-compatible API for IDE and tooling integration",
   "author": "Rahat Hasan <rahat@akkhar-labs.com>",
   "license": "GPL-3.0-or-later",
   "private": true,
